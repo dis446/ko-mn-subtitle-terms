@@ -1,162 +1,287 @@
-# Domain pack: Korean court / historical drama (사극)
+# Domain pack: Korean court / historical drama (사극) and Korean-written
+# Western-fantasy court drama.
 #
-# Korean court titles are a CLOSED SET — roughly fifty terms that cover every
-# sageuk ever made. Getting them right once means every historical drama
-# inherits them, which is why this is the highest-value file in the repo.
+# Korean court titles are a CLOSED SET. Getting them right once means every
+# historical drama inherits them, which is why this is the highest-value file
+# in the repo.
 #
-# STATUS DISCIPLINE
-#   confirmed    — validated in a multi-model bake-off against real dialogue,
-#                  or approved by a native speaker
-#   needs_review — drafted from standard usage; NOT yet approved
+# EVIDENCE USED (in priority order)
+#   NIKL  — National Institute of Korean Language, Korean-Mongolian learner's
+#           dictionary (krdict.korean.go.kr, Mongolian edition)
+#   MXT   — Монгол хэлний их тайлбар толь (mongoltoli.mn), monolingual
+#   MNWP  — mn.wikipedia usage (e.g. "херцог (гүн)", Маркиз, Барон)
+# Where NIKL and the Mongolian monolingual dictionary disagree, the Mongolian
+# dictionary wins for the meaning of the Mongolian word.
 #
-# Nothing here is backed by a Mongolian national standard. The state's own
-# position (ХБҮЗ, Oct 2025) is that no such standard exists for rendering
-# foreign terms. These are conventions, chosen for consistency.
-version: 1
+# STATUS
+#   confirmed — decided under delegated authority, reasoning in `note`.
+#   `confidence: medium` marks the entries a native speaker should audit first.
+#   `usage` is emitted into the translation prompt alongside the term.
+#
+# Nothing here is backed by a Mongolian national standard (ХБҮЗ, Oct 2025:
+# none exists). These are conventions, chosen for accuracy and consistency.
+version: 2
 domain: court-historical
-applies_to: [sageuk, court, historical, palace]
+applies_to: [sageuk, court, historical, palace, fantasy-court]
 
 titles_royal:
   - ko: 폐하
-    en: Your Majesty (sovereign)
-    mn: Эрхэм дээдэс ээ
-    status: needs_review
-    note: "Vocative. Third person: Хатан хаантан / Эзэн хаантан."
+    en: Your Majesty (emperor or empress)
+    mn: Эрхэм дээдэс
+    status: confirmed
+    note: "NIKL: эрхэм дээдэс (for 황제 and 황후). Gender-neutral; works as vocative and 3rd person."
   - ko: 전하
-    en: Your Highness
-    mn: Эрхэм дээд
-    status: needs_review
+    en: Your Highness (Joseon king; prince in fantasy dramas)
+    mn: хаантан
+    status: confirmed
+    usage: "Vocative: Хаантан минь. When the addressee is a prince, works/ overrides (ханхүү)."
+    note: "NIKL: хаантан (Joseon king). MXT: хаантан = honorific of хаан. Distinct from Эрхэм дээдэс, so 폐하 > 전하 survives."
   - ko: 마마
-    en: Her/His Highness (royal consort, queens dowager)
-    mn: Эрхэм дээд
-    status: needs_review
+    en: royal honorific suffix / bare address to royalty
+    mn: эрхэм дээдэс
+    status: confirmed
+    confidence: medium
+    usage: "Fold into the title it follows: 중전마마 → хатантан, 상감마마 → хаантан, 대비마마 → хатан эх. Bare 마마 → Эрхэм дээдэс."
+    note: "NIKL sense 2: эрхэм дээдэс. Collides with 폐하 only for bare 마마, which in sageuk addresses royalty with no emperor present."
   - ko: 황후
     en: Empress
     mn: Хатан хаан
     status: confirmed
+    note: "mn.wikipedia calls Empress Masako (皇后) хатан хаан. NIKL gives хатан, kept for 왕비 so the two ranks differ."
   - ko: 황제
     en: Emperor
     mn: Эзэн хаан
     status: confirmed
   - ko: 황태자
-    en: Crown Prince
-    mn: Эзэн хааны хунтайж
-    status: needs_review
+    en: Crown Prince (imperial)
+    mn: хунтайж
+    status: confirmed
+    usage: "Where heirship itself is the point: угсаа залгамжлагч хунтайж."
+    note: "NIKL: хунтайж. хунтайж itself derives from 皇太子. v1's Эзэн хааны хунтайж was redundant."
   - ko: 세자
     en: Crown Prince (Joseon)
     mn: хунтайж
-    status: needs_review
+    status: confirmed
+    usage: "Full form: угсаа залгамжлах хунтайж (NIKL)."
+    note: "NIKL: угсаа залгамжлах хунтайж; the short form matches 황태자 — the emperor/king distinction is carried by the father's title."
   - ko: 왕비
     en: Queen consort
     mn: хатан
-    status: needs_review
+    status: confirmed
+    note: "NIKL: хатан. Kept one step below 황후 = Хатан хаан."
   - ko: 대비
     en: Queen Dowager
-    mn: бэлэвсэн хатан
-    status: needs_review
+    mn: хатан эх
+    status: confirmed
+    confidence: medium
+    note: "Not in NIKL. 대비 is formally the king's mother; хатан эх (queen mother) says that. v1 бэлэвсэн хатан ('widowed queen') stressed the wrong fact."
   - ko: 중전
     en: The Queen (as addressed by court)
-    mn: хатан
-    status: needs_review
+    mn: хатантан
+    status: confirmed
+    note: "NIKL sense 2: хатантан (honorific for the queen)."
   - ko: 공주
     en: Princess (royal daughter)
     mn: гүнж
-    status: needs_review
+    status: confirmed
+    note: "NIKL + MXT: гүнж = khan's daughter (and itself from 公主)."
   - ko: 왕자
     en: Prince (royal son)
-    mn: хан хүү
-    status: needs_review
+    mn: ханхүү
+    status: confirmed
+    note: "MXT: ханхүү = хааны хүү; one word (Бяцхан ханхүү). v1's two-word хан хүү is non-standard."
   - ko: 대군
-    en: Grand Prince
-    mn: их хан хүү
-    status: needs_review
+    en: Grand Prince (son of the queen)
+    mn: ханхүү
+    status: confirmed
+    confidence: medium
+    note: "Deliberately merged with 왕자. NIKL's хан хүү is visually identical to ханхүү; их ханхүү would read 'eldest prince', an active error."
   - ko: 대공
     en: Grand Duke
     mn: их гүн
-    status: needs_review
+    status: confirmed
+    usage: "대공 부인 → их гүнгийн хатагтай."
+    note: "Follows 공작 = гүн; их = 大."
+  - ko: 왕
+    en: King
+    mn: хаан
+    status: confirmed
+    note: "Kept one step below 황제 = Эзэн хаан."
+  - ko: 승하
+    en: (a monarch's) death
+    mn: таалал төгсөх
+    status: confirmed
+    note: "MXT: таалал төгсөх = death of one owed reverence; used in press for Prince Philip."
+
+realms:
+  - ko: 제국
+    en: Empire
+    mn: эзэнт гүрэн
+    status: confirmed
+  - ko: 왕국
+    en: Kingdom
+    mn: вант улс
+    status: confirmed
+  - ko: 황실
+    en: Imperial family
+    mn: эзэн хааны гэр бүл
+    status: confirmed
+    note: "As in mn.wikipedia 'Японы Эзэн хааны гэр бүл'."
 
 nobility:
+  # The five Western ranks. MXT ГҮН I.2: гүн = "the first of the five feudal
+  # ranks", and MNWP writes "херцог (гүн)" — so гүн = duke. NIKL maps 공작 to
+  # бээс and 백작 to гүн; rejected, because it contradicts the Mongolian
+  # dictionary and v1 had BOTH 공작 and 백작 as гүн (a collision).
   - ko: 공작
     en: Duke
     mn: гүн
-    status: needs_review
+    status: confirmed
+    usage: "공작부인 → гүнгийн хатагтай (as in press 'гүнгийн хатагтай Камилла')."
+    note: "MXT + MNWP; гүн also derives from 公."
   - ko: 후작
     en: Marquess
     mn: маркиз
-    status: needs_review
+    status: confirmed
+    note: "MNWP article Маркиз."
   - ko: 백작
     en: Count / Earl
-    mn: гүн
-    status: needs_review
+    mn: граф
+    status: confirmed
+    note: "MNWP uses граф alongside херцог (гүн). Distinct from гүн."
+  - ko: 자작
+    en: Viscount
+    mn: виконт
+    status: confirmed
+    confidence: medium
+    note: "Same loan series as маркиз/граф/барон."
+  - ko: 남작
+    en: Baron
+    mn: барон
+    status: confirmed
+    note: "MNWP article Барон; familiar from Барон Унгерн."
   - ko: 경
-    en: Lord (as in Kosair 경)
+    en: Sir / Lord (Kosair 경)
     mn: ноён
     status: confirmed
+    usage: "After the name: Кошар ноён."
     note: "Validated across every model in the bake-off."
   - ko: 영애
-    en: Lady (young noblewoman)
-    mn: хатагтай
-    status: needs_review
+    en: young lady (a noble's daughter)
+    mn: авхай
+    status: confirmed
+    note: "MXT АВХАЙ 1: 'аливаа язгууртан хүний охин' — exactly 영애."
   - ko: 부인
     en: Lady / Madam (married noblewoman)
     mn: хатагтай
-    status: needs_review
+    status: confirmed
+    note: "NIKL: хатагтай (婦人). MXT: honorific for a woman."
   - ko: 나으리
     en: my lord (archaic address)
-    mn: ноён минь
-    status: needs_review
+    mn: ноёнтон
+    status: confirmed
+    note: "NIKL (나리): ноёнтон; MXT: honorific of ноён. One word, shorter than v1's ноён минь."
+  - ko: 영주
+    en: feudal lord (Rashta's former master)
+    mn: нутгийн ноён
+    status: confirmed
+    confidence: medium
+    note: "MXT НОЁН 1 = ruler of a locality; нутгийн keeps it apart from 경 = ноён."
+  - ko: 귀족
+    en: noble, aristocrat
+    mn: язгууртан
+    status: confirmed
+  - ko: 평민
+    en: commoner
+    mn: энгийн ард
+    status: confirmed
+  - ko: 기사
+    en: knight
+    mn: хүлэг баатар
+    status: confirmed
+    note: "Standard Mongolian for a European knight."
 
 palace_household:
   - ko: 상궁
     en: senior court lady
-    mn: ордны бүсгүй
-    status: needs_review
+    mn: ахлах шивэгчин
+    status: confirmed
+    confidence: medium
+    note: "Not in NIKL. A ranked senior attendant: ахлах (senior) + шивэгчин."
   - ko: 나인
     en: palace maid
-    mn: ордны шивэгчин
-    status: needs_review
-  - ko: 시녀
-    en: handmaiden
     mn: шивэгчин
-    status: needs_review
+    status: confirmed
+    note: "NIKL: шивэгчин. MXT marks шивэгчин archaic — right for a period drama."
+  - ko: 시녀
+    en: handmaiden / lady-in-waiting
+    mn: шивэгчин
+    status: confirmed
+    confidence: medium
+    note: "NIKL: шивэгчин. Shares 나인's form, as NIKL does. In fantasy dramas the 시녀 may be noble; the Korean word does not say so either."
+  - ko: 하녀
+    en: maid (servant)
+    mn: үйлчлэгч
+    status: confirmed
+    note: "Lower than 시녀; MXT үйлчлэгч = servant / attendant."
   - ko: 내관
-    en: eunuch official
-    mn: ордны түшмэл
-    status: needs_review
+    en: eunuch attendant (polite term)
+    mn: бараа бологч
+    status: confirmed
+    confidence: medium
+    note: "NIKL: бараа бологч. 내관 is the euphemism; the blunt 환관 is тайган. Keeps the register."
+  - ko: 환관
+    en: eunuch (plain term)
+    mn: тайган
+    status: confirmed
+    note: "NIKL + MXT: тайган = castrated man."
   - ko: 노비
     en: slave / bondservant
-    mn: зарц
-    status: needs_review
+    mn: боол
+    status: confirmed
+    note: "NIKL: боол. v1's зарц means a (possibly free) servant."
+  - ko: 노예
+    en: slave
+    mn: боол
+    status: confirmed
+    note: "NIKL: боол. 36 occurrences in E01-E04 (Rashta, 도망 노예)."
   - ko: 후궁
     en: royal concubine
     mn: татвар эм
     status: confirmed
-    note: "Used in E01 dialogue (첩); татвар эм is the standard term."
+    note: "NIKL: хааны татвар эхнэр; MXT татвар эм. (v1 note claimed E01 used it; it does not — the only 첩 hit is inside 첩보.)"
   - ko: 첩
     en: concubine
     mn: татвар эм
     status: confirmed
+    note: "NIKL: татвар эм, дагавар эм."
 
 honorific_verbs:
   # The distinction that models most often lose. See rules/honorifics.yaml.
   - ko: 계시다
-    en: to be (honorific)
-    mn: залах
-    status: needs_review
+    en: to be / stay (honorific)
+    mn: залрах
+    status: confirmed
+    usage: "Main verb only. Auxiliary -고 계시다 → plain -ж байна; the honour is carried by the subject term."
+    note: "MXT ЗАЛРАХ I.3: honorific of sitting/residing. v1's залах means 'to straighten / steer' — wrong word."
   - ko: 오시다
     en: to come (honorific)
     mn: морилох
-    status: needs_review
-    note: "морилж байна — validated in bake-off as the correct court register."
+    status: confirmed
+    note: "MXT: ихэс дээдсийн явах, ирэхийг хүндэтгэн хэлэх; validated in bake-off (морилж байна)."
   - ko: 드시다
     en: to eat/drink (honorific)
     mn: зооглох
-    status: needs_review
+    status: confirmed
+    note: "MXT: идэх, уухын хүндэтгэл."
   - ko: 주무시다
     en: to sleep (honorific)
-    mn: унтах (соёрхон унтах)
-    status: needs_review
+    mn: нойрсох
+    status: confirmed
+    note: "NIKL + MXT: нойрсох = унтахын хүндэтгэл. v1's унтах is the plain verb."
   - ko: 돌아가시다
     en: to pass away (honorific)
-    mn: таалал төгсөх
-    status: needs_review
+    mn: өөд болох
+    status: confirmed
+    usage: "Of a monarch → таалал төгсөх (= 승하)."
+    note: "NIKL: нас барах, өөд болох. General honorific, not royal-only; v1's таалал төгсөх is reserved for monarchs."

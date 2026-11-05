@@ -1,69 +1,198 @@
 # Transliteration regression corpus
 #
-# Every case is a real Korean string taken from The Remarried Empress
-# S01E01-E04 subtitle tracks, or a well-known Korean name used to pin a rule.
-# These assert the RULE ENGINE's output — not the finished subtitle spelling.
-# Where the rule output is awkward, the exception belongs in works/, not here.
+# Every case is a single term — a name from The Remarried Empress S01E01-E04
+# Korean subtitle track, a well-known Korean name/place, or a loanword that pins
+# one rule. No dialogue. These assert the RULE ENGINE's output — not the finished
+# subtitle spelling. Where the finished spelling differs (an established-name
+# exception), the exception lives in works/, not here.
+#
+# `rule:` names the rule in rules/hangul-to-cyrillic.yaml the case pins.
+# `mode: name` runs the Korean-personal-name mode (--name).
 #
 # Run: python3 scripts/translit.py --test
-version: 1
+version: 2
 cases:
   # ── character names, mined from the actual dialogue ──
   - ko: 라스타
     mn: Раста
+    rule: epenthetic_eu
     note: "Rashta — Korean is 라스타, not 라슈타. ㅡ elided in 스"
   - ko: 코샤르
     mn: Кошар
+    rule: palatalisation
     note: "Kosair — 샤 → ша (palatalisation absorbs the glide)"
   - ko: 알바니
     mn: Албани
-    note: "Albani — medial ㄹ is л, not ль"
+    rule: finals
+    note: "Albani — coda ㄹ before a consonant is л"
   - ko: 나비에
     mn: Набие
-    note: "Navier — rule gives Набие; the -r is an English artefact, see works/"
+    rule: seam_i_e
+    note: "Navier — medial ㅂ → б; и+э seam → ие; no -r (Korean has none)"
   - ko: 소비에슈
-    mn: Собиешу
-    note: "Sovieshu — medial ㅂ → б, 슈 → шу"
+    mn: Собиешү
+    rule: vowels.ㅜ
+    note: "Sovieshu — 슈 → шү: palatalised ㅅ + ㅠ with glide absorbed, ㅜ → ү"
   - ko: 하인리
     mn: Хаинри
+    rule: liquid_assimilation
     note: "Heinrey — liquid assimilation OFF, so н+р survives"
   - ko: 서즈
     mn: Сож
-    note: "Circe/Seoju — 즈 elides to ж"
+    rule: epenthetic_eu
+    note: "Circe — word-final 즈 elides to ж"
   - ko: 부틀린
-    mn: Путыллин
-    note: "Botulin — 틀 keeps its ㅡ (has a final); ugly by rule, override in works/"
+    mn: Пүтлин
+    rule: cluster_eu_l
+    note: "Botulin — Cㅡㄹ+ㄹ is a Korean-spelled tl cluster (v1 gave Путыллин)"
   - ko: 상시천
     mn: Саншичон
+    rule: palatalisation
     note: "Springwater — final ㅇ → н, 시 → ши"
   - ko: 베르디
-    mn: Перди
-    note: "Verdi — word-initial ㅂ → п; the real name wants Берди, see works/"
+    mn: Пэрди
+    rule: stop_voicing
+    note: "Verdi — word-initial ㅂ → п, ㅔ → э; finished spelling Верди is an established-name exception in works/"
+  - ko: 로라
+    mn: Рора
+    rule: initials.ㄹ
+    note: "Laura — onset ㄹ → р; finished spelling Лора is an established-name exception in works/"
+  - ko: 크리스타
+    mn: Криста
+    rule: epenthetic_eu
+    note: "Queen Krista (E04) — word-initial Cㅡ elided when a syllable follows"
+  - ko: 트로비
+    mn: Троби
+    rule: epenthetic_eu
+    note: "Trovi (Navier's house) — word-initial 트 elided; ㅂ stays б"
+  - ko: 탈리탈
+    mn: Таллитал
+    rule: finals
+    note: "Tallital — coda ㄹ + onset ㄹ is a geminate лл; word-final ㄹ is л"
+  - ko: 맥켄나
+    mn: Мэккэнна
+    rule: vowels.ㅐ
+    note: "McKenna — ㅐ and ㅔ both → э; final ㄱ before ㅋ → к"
+  - ko: 륍트
+    mn: Рвипт
+    rule: finals
+    note: "Luipt — 륍 is ㄹ+ㅟ+ㅂ; coda ㅂ before a consonant → п"
+  - ko: 워턴
+    mn: Вотон
+    rule: vowels.ㅝ
+    note: "Walton — ㅝ → во"
 
   # ── well-known Korean names pinning the general rules ──
   - ko: 김정은
-    mn: Кимжонын
-    note: "initial ㄱ → к; 정 → жон; spacing is the caller's job → Ким Жон Ын"
+    mn: Кимжонун
+    rule: eu_vowel_initial
+    note: "vowel-initial ㅡ → у (ы never starts a syllable; avoids genitive-looking Жонын)"
+  - ko: 김정은
+    mn: Ким Жон Ун
+    mode: name
+    rule: name_mode_space_syllables
+    note: "matches universal Mongolian press form"
   - ko: 문재인
-    mn: Мунжэин
-    note: "medial ㅈ → ж"
+    mn: Мүн Жэ Ин
+    mode: name
+    rule: vowels.ㅜ
+    note: "ㅜ → ү, ㅐ → э; matches mn.wikipedia / press"
   - ko: 박근혜
-    mn: Паккынхе
-    note: "final ㄱ before a consonant stays к, and 근 keeps its ㅡ"
+    mn: Пак Гын Хе
+    mode: name
+    rule: stop_voicing
+    note: "post-obstruent (tensed, unaspirated) ㄱ → г; matches press Пак Гын Хе"
+  - ko: 박근혜
+    mn: Пакгынхе
+    rule: stop_voicing
+    note: "v1 gave Паккынхе; tense = unaspirated = г"
+  - ko: 윤석열
+    mn: Юн Сок Ёл
+    mode: name
+    rule: name_mode_space_syllables
+    note: "name mode closes every coda (Сок, not liaison Сог); word-final ㄹ → л"
+  - ko: 문형배
+    mn: Мүн Хён Бэ
+    mode: name
+    rule: stop_voicing
+    note: "given-name ㅂ after a sonorant → б across the space (press: Мүн Хён Бэ)"
   - ko: 김철
-    mn: Кимчоль
-    note: "word-final ㄹ softens to ль"
+    mn: Кимчол
+    rule: finals.ㄹ
+    note: "word-final ㄹ → л, not ль (v1 gave Кимчоль)"
 
   # ── place names pinning liaison and nasals ──
   - ko: 서울
-    mn: Соуль
-    note: "ㅓ → о (not ө)"
+    mn: Соүл
+    rule: vowels.ㅓ
+    note: "ㅓ → о, ㅜ → ү, final л. The exonym Сөүл is lexical, not a rule output"
   - ko: 강남
     mn: Каннам
+    rule: finals.ㅇ
     note: "final ㅇ → н, not нг"
   - ko: 부산
-    mn: Пусан
-    note: "word-initial ㅂ → п"
+    mn: Пүсан
+    rule: stop_voicing
+    note: "word-initial ㅂ → п (mn.wikipedia: Пүсань)"
   - ko: 백제
-    mn: Пэкже
-    note: "final ㄱ before ㅈ → к"
+    mn: Пэкжэ
+    rule: vowels.ㅔ
+    note: "final ㄱ before ㅈ → к; ㅔ → э"
+  - ko: 한국어
+    mn: Хангүго
+    rule: finals_before_vowel
+    note: "coda ㄱ before a vowel-initial syllable liaises as г"
+
+  # ── loanwords / common words pinning v2 rules ──
+  - ko: 로봇
+    mn: Робот
+    rule: finals.ㅅ
+    note: "coda ㅅ is [t̚]: loanword final -t is spelled ㅅ"
+  - ko: 김밥
+    mn: Кимбап
+    rule: finals.ㅂ
+    note: "word-final ㅂ → п (v1 gave б)"
+  - ko: 닭
+    mn: Так
+    rule: finals.ㄺ
+    note: "cluster coda neutralises word-finally"
+  - ko: 앉아
+    mn: Анжа
+    rule: finals_before_vowel
+    note: "cluster coda keeps both consonants before a vowel"
+  - ko: 오빠
+    mn: Оппа
+    rule: tense_initial
+    note: "medial tense consonant stays doubled (form Mongolian fans already use)"
+  - ko: 씨
+    mn: Ши
+    rule: tense_initial
+    note: "word-initial tense de-geminated; ㅆ before ㅣ → ш, not щ"
+  - ko: 셰프
+    mn: Шэп
+    rule: palatalisation
+    note: "ㅖ is a palatalisation trigger; 셰 → шэ"
+  - ko: 가져
+    mn: Кажо
+    rule: affricate_glide_absorption
+    note: "no y-glide after ㅈ (져 [저])"
+  - ko: 클라라
+    mn: Клара
+    rule: cluster_eu_l
+    note: "Clara — Cㅡㄹ+ㄹ cluster, word-initially too"
+  - ko: 스웨덴
+    mn: Свэдэн
+    rule: vowels.ㅞ
+    note: "ㅞ → вэ; word-initial 스 elided"
+  - ko: 희망
+    mn: Химан
+    rule: ui_vowel
+    note: "ㅢ after a consonant → и (희 [히])"
+  - ko: 의자
+    mn: Уйжа
+    rule: ui_vowel
+    note: "vowel-initial ㅢ → уй"
+  - ko: 그
+    mn: Кы
+    rule: epenthetic_eu
+    note: "a lone Cㅡ word keeps its vowel"

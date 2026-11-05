@@ -49,13 +49,31 @@ maps deterministically and new shows need only exception entries.
 ```
 $ python3 scripts/translit.py 라스타 소비에슈 코샤르
 라스타	Раста
-소비에슈	Собиешу
+소비에슈	Собиешү
 코샤르	Кошар
+
+$ python3 scripts/translit.py --name 김정은 박근혜      # Korean personal names
+김정은	Ким Жон Ун
+박근혜	Пак Гын Хе
 
 $ python3 scripts/translit.py --explain 소비에슈
 $ python3 scripts/translit.py --test
-18/18 passed
+43/43 passed
 ```
+
+The table rests on two Mongolian facts: the stop contrast is **aspiration**, not
+voicing (б/д/г are unaspirated, п/т/к aspirated), and у/ү, о/ө are distinct vowels
+(Korean ㅜ [u] = ү). Each mapping states its reason in the YAML; Mongolian press
+and mn.wikipedia forms (Сөүл, Тэгү, Мүн Жэ Ин, Юн Сок Ёл) were used to
+corroborate, not as authority.
+
+### Names: what the subtitle spells
+
+The rule output is the default — the viewer hears the Korean. The one exception:
+when the Korean is the standard Korean spelling of a real, widely known Western
+name, use that name's conventional Mongolian form, **only** to resolve a contrast
+Korean cannot write (l/r, b/v), never to add or remove a sound
+(로라 → Лора, 베르디 → Верди; but 나비에 → Набие, not Навиер).
 
 Every rule in the file is backed by a case in `tests/corpus.yaml`, mined from
 real subtitle tracks. Change a rule, and a broken name fails the build.
@@ -64,14 +82,18 @@ real subtitle tracks. Change a rule, and a broken name fails the build.
 
 Every entry is marked:
 
-- `confirmed` — validated in a multi-model bake-off against real dialogue, or
-  approved by a native speaker
+- `confirmed` — decided, with the reasoning and evidence in the entry's `note`
+  (NIKL Korean–Mongolian dictionary, Монгол хэлний их тайлбар толь, bake-off)
 - `needs_review` — drafted, **not approved**
+
+`confidence: medium` marks confirmed entries a native speaker should audit first.
+`usage:` is a context rule emitted into the prompt next to the term.
 
 `compile_termbase.py` emits only `confirmed` entries into a prompt by default and
 lists the rest as warnings. Shipping an unapproved guess into a translation run is
 how a season ends up inconsistent — so the default is to withhold, and `--strict`
-fails the build if anything is pending.
+fails the build if anything is pending **or** if a character's `rule_output` no
+longer matches the engine (a rule change can't silently rename a character).
 
 ```
 $ python3 scripts/compile_termbase.py --work the-remarried-empress \
@@ -88,7 +110,7 @@ The highest-value contribution is **resolving a `needs_review` entry** — those
 are the places where the rule output and convention disagree, and only a native
 speaker can settle them. Bring a reason, not a preference.
 
-Add a `tests/corpus.yaml` case with any new rule.
+Add a `tests/corpus.yaml` case with any new rule. Requires PyYAML.
 
 ## Licence
 

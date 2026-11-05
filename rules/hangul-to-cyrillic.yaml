@@ -8,90 +8,138 @@
 # MNS 5217:2012 is Cyrillic → Latin romanisation, the wrong direction.
 #
 # So this file IS the convention. It is deterministic, testable, and versioned.
-# It is not "correct" by authority — it is correct by being consistent.
+# It is not "correct" by authority — it is correct by being consistent and by
+# every mapping having a stated phonetic reason. Where Mongolian usage exists
+# (press and mn.wikipedia forms of Korean names: Сөүл, Тэгү, Жэжү, Мүн Жэ Ин,
+# Юн Сок Ёл, Ким Жон Ун, Пак Гын Хе) it was used as corroboration, never as
+# the authority.
 #
-# Everything here was derived from and checked against real Korean dialogue
-# (The Remarried Empress S01E01-E04 subtitle tracks). See tests/corpus.yaml.
+# THE TWO MONGOLIAN FACTS THE WHOLE TABLE RESTS ON
+#   1. Mongolian б/д/г are voiceless UNASPIRATED, п/т/к are ASPIRATED. The
+#      Mongolian stop contrast is aspiration, not voicing.
+#   2. Mongolian у = [ʊ], ү = [u]; о = [ɔ], ө = [o]; э = [e]; е = [je];
+#      ы occurs only after a consonant; word-final н is read [ŋ].
+#
+# Everything here was checked against real Korean dialogue (The Remarried
+# Empress S01E01-E04 subtitle tracks). See tests/corpus.yaml — every rule has
+# at least one case there.
 
-version: 1
+version: 2
 description: >
   Syllable-level Hangul to Mongolian Cyrillic mapping. Composable: any of the
   11,172 modern Hangul syllables transliterates from these tables, so new shows
   need no new name entries — only exceptions.
 
 # ── Initial consonants (초성, 19) ────────────────────────────────────────────
-# Applied at the start of a syllable. Values are before a vowel.
+# Value used medially. Word-initial and contextual variants are in rules:.
 initials:
-  ㄱ: г
-  ㄲ: кк
+  ㄱ: г        # medial lenis: voiced after vowels/sonorants, tense-unaspirated
+  ㄲ: кк       #   after obstruents — both unaspirated, so Mongolian г
   ㄴ: н
   ㄷ: д
   ㄸ: тт
-  ㄹ: р
+  ㄹ: р        # onset ㄹ is a tap [ɾ]
   ㅁ: м
   ㅂ: б
   ㅃ: пп
-  ㅅ: с        # → ш before a y-vowel or ㅣ; see rules.palatalisation
+  ㅅ: с        # → ш before i/y; see rules.palatalisation
   ㅆ: сс
   ㅇ: ""       # silent placeholder, carries no consonant
-  ㅈ: ж
+  ㅈ: ж        # Mongolian usage: Жэ, Жон, Жэжү
   ㅉ: жж
   ㅊ: ч
-  ㅋ: к
+  ㅋ: к        # aspirated → aspirated
   ㅌ: т
   ㅍ: п
-  ㅎ: х
+  ㅎ: х        # Mongolian has no [h]; х is the universal choice
 
 # ── Vowels (중성, 21) ───────────────────────────────────────────────────────
 vowels:
   ㅏ: а
-  ㅐ: э
+  ㅐ: э        # ㅐ and ㅔ have merged to [e] in modern Korean → one letter
   ㅑ: я
-  ㅒ: е
-  ㅓ: о        # 서울 → Соул, 정 → Жон, 성 → Сон
-  ㅔ: е        # 베르디 → Берди
+  ㅒ: е        # [je]; Mongolian е is iotated
+  ㅓ: о        # [ʌ~ɔ] → о [ɔ]. Юн Сок Ёл, Жон, Инчон. (Сөүл is a lexicalised exonym)
+  ㅔ: э        # v2: was е. Mongolian е is [je]; after a consonant [e] is э (Жэжү, Тэгү)
   ㅕ: ё
-  ㅖ: е
-  ㅗ: о
+  ㅖ: е        # [je] → е (Пак Гын Хе)
+  ㅗ: о        # merges with ㅓ — Mongolian has no letter pair that keeps
+               #   [ʌ]/[o] apart without breaking every established form
   ㅘ: ва
   ㅙ: вэ
-  ㅚ: вэ
+  ㅚ: вэ       # modern [we]
   ㅛ: ё
-  ㅜ: у
+  ㅜ: ү        # v2: was у. Korean ㅜ is [u] = Mongolian ү, not у [ʊ].
+               #   Mongolian usage agrees: Сөүл, Мүн, Тэгү, Жэжү, Пүсань, Үлсан
   ㅝ: во
-  ㅞ: ве
+  ㅞ: вэ       # v2: was ве — consistency with ㅔ → э
   ㅟ: ви
   ㅠ: ю
-  ㅡ: ы        # usually elided — see rules.epenthetic_eu
-  ㅢ: ый
+  ㅡ: ы        # after a consonant; see rules.eu_vowel_initial / epenthetic_eu
+  ㅢ: ый       # see rules.ui_vowel
   ㅣ: и
 
 # ── Final consonants (종성, 28) ─────────────────────────────────────────────
+# Korean neutralises every coda to one of seven unreleased sounds
+# [k̚ n t̚ l m p̚ ŋ]. `finals` is that neutralised value, used word-finally and
+# before a consonant. `finals_before_vowel` is used when the next syllable is
+# vowel-initial (ㅇ onset): the coda is then pronounced as the next onset.
 finals:
   "": ""
-  ㄱ: г
+  ㄱ: к        # 박 → Пак (unreleased voiceless; universal Mongolian usage)
   ㄲ: к
+  ㄳ: к
+  ㄴ: н
+  ㄵ: н
+  ㄶ: н
+  ㄷ: т        # v2: was д word-finally — inconsistent with ㄱ → к
+  ㄹ: л        # v2: word-final is plain л, never ль (Юн Сок Ёл, Сөүл).
+               #   Mongolian ль is palatalised [lʲ]; the Korean coda is not.
+  ㄺ: к
+  ㄻ: м
+  ㄼ: л
+  ㄽ: л
+  ㄾ: л
+  ㄿ: п
+  ㅀ: л
+  ㅁ: м
+  ㅂ: п        # v2: was б word-finally
+  ㅄ: п
+  ㅅ: т        # v2: was с. Coda ㅅ is [t̚]; loanwords spell final -t with ㅅ (로봇 → Робот)
+  ㅆ: т
+  ㅇ: н        # [ŋ]; Mongolian word-final н is itself read [ŋ]: 강 → Кан
+  ㅈ: т
+  ㅊ: т
+  ㅋ: к
+  ㅌ: т
+  ㅍ: п
+  ㅎ: ""
+
+finals_before_vowel:
+  "": ""
+  ㄱ: г        # 한국어 → Хангуго (liaison, voiced)
+  ㄲ: кк
   ㄳ: кс
   ㄴ: н
-  ㄵ: нж
+  ㄵ: нж       # 앉아 → Анжа
   ㄶ: н
   ㄷ: д
-  ㄹ: л        # 알바니 → Албани; word-final becomes ль (presentation rule)
-  ㄺ: льг
-  ㄻ: льм
-  ㄼ: льб
-  ㄽ: льс
-  ㄾ: льт
-  ㄿ: льп
-  ㅀ: ль
+  ㄹ: л        # kept as the spelled coda for readability; not re-flapped
+  ㄺ: лг
+  ㄻ: лм
+  ㄼ: лб
+  ㄽ: лс
+  ㄾ: лт
+  ㄿ: лп
+  ㅀ: р
   ㅁ: м
   ㅂ: б
   ㅄ: пс
   ㅅ: с
-  ㅆ: с
-  ㅇ: н        # Korean final ㅇ is written н in names: 강 → Кан, 정 → Жон
-  ㅈ: д
-  ㅊ: д
+  ㅆ: сс
+  ㅇ: н
+  ㅈ: ж
+  ㅊ: ч
   ㅋ: к
   ㅌ: т
   ㅍ: п
@@ -99,62 +147,102 @@ finals:
 
 # ── Contextual rules ────────────────────────────────────────────────────────
 rules:
-  # Korean plain ㄱ/ㄷ/ㅂ are voiceless word-initially and voiced between
-  # vowels. Mongolian distinguishes the two, so position decides the letter.
-  #   김정은 → Ким Жон Ын   (initial ㄱ = к)
-  #   소비에슈 → Собиешу     (medial ㅂ = б)
+  # Word-initial Korean lenis ㄱ/ㄷ/ㅂ has long VOT in modern Seoul speech (the
+  # lenis/aspirated contrast has moved to pitch), so a Mongolian ear — which
+  # sorts stops by aspiration — hears к/т/п. Everywhere else the lenis stop is
+  # unaspirated (voiced after vowels/sonorants, tensed after obstruents), and
+  # unaspirated is exactly what Mongolian г/д/б are.
+  #   김 → Ким, 부산 → Пүсан, 박근혜 → Пакгынхе (press: Пак Гын Хе)
+  # v2: post-obstruent stops were к/т/п; now г/д/б (tense = unaspirated).
   stop_voicing:
     enabled: true
     word_initial:   {ㄱ: к, ㄷ: т, ㅂ: п}
-    intervocalic:   {ㄱ: г, ㄷ: д, ㅂ: б}
-    # ㅈ/ㅊ are written ж/ч in both positions — Mongolian usage (Жон, Жэ)
-    # does not voice them, so they are not in these maps.
+    elsewhere:      {ㄱ: г, ㄷ: д, ㅂ: б}
 
-  # ㅅ/ㅆ are palatalised before y-vowels and ㅣ in Korean, and Mongolian has
-  # a dedicated letter for that sound. 샤 → ша, not ся.
+  # v2 NEW. Mongolian orthography has no word-initial geminates, so a tense
+  # consonant at the start of a word is written single. Medially the doubling
+  # stays (오빠 → Оппа — the form Mongolian K-pop fans already use).
+  tense_initial:
+    enabled: true
+    map: {ㄲ: к, ㄸ: т, ㅃ: п, ㅆ: с, ㅉ: ж}
+
+  # ㅅ/ㅆ are alveolo-palatal before i/y in Korean, and Mongolian has ш for it.
+  # The y-glide is absorbed by the hushing consonant: 샤 → ша, not шя.
+  # v2: ㅆ → ш (was щ: Mongolian reads щ as [ʃtʃ], a sound Korean never has);
+  #     ㅖ/ㅒ added as triggers (셰프 → Шэп).
   palatalisation:
     enabled: true
-    triggers: [ㅑ, ㅕ, ㅛ, ㅠ, ㅣ]
+    triggers: [ㅑ, ㅕ, ㅛ, ㅠ, ㅣ, ㅖ, ㅒ]
     map:
       ㅅ: ш
-      ㅆ: щ
-    # the y-glide is absorbed by the hushing consonant: 샤 → ша, not шя
-    vowel_map: {ㅑ: а, ㅕ: о, ㅛ: о, ㅠ: у, ㅣ: и}
+      ㅆ: ш
+    vowel_map: {ㅑ: а, ㅕ: о, ㅛ: о, ㅠ: ү, ㅣ: и, ㅖ: э, ㅒ: э}
 
-  # Korean inserts ㅡ as an epenthetic vowel inside consonant clusters where
-  # Korean phonotactics forbid the cluster. Mongolian permits it, so the vowel
-  # is dropped. Evidence from real dialogue:
-  #   라스타 → Раста   (not Расыта)
-  #   코샤르 → Кошар   (not Кошар ы р)
-  #   부틀린 → Бутлин  (not Бутыллин)
+  # v2 NEW. Korean does not pronounce the y-glide after ㅈ/ㅉ/ㅊ (standard
+  # pronunciation rule 5: 져 [저], 쳐 [처]), so it is not written: 가져 → Кажо.
+  affricate_glide_absorption:
+    enabled: true
+    consonants: [ㅈ, ㅉ, ㅊ]
+    vowel_map: {ㅑ: а, ㅕ: о, ㅛ: о, ㅠ: ү, ㅖ: э, ㅒ: э}
+
+  # Korean inserts ㅡ to break up consonant clusters in foreign-style names
+  # (Korean phonotactics forbid them; Mongolian loanword spelling permits
+  # them). An open Cㅡ syllable is dropped to its bare consonant.
+  #   라스타 → Раста   코샤르 → Кошар   서즈 → Сож
+  # v2: now also word-initially when another syllable follows
+  #   (크리스타 → Криста, 트로비 → Троби). Safe because Sino-Korean has no
+  #   open ㅡ syllables at all, so name syllables are never hit. A lone Cㅡ
+  #   word keeps its vowel (그 → Кы). Native-Korean words with a real ㅡ
+  #   (그루) are the known casualty — they go to works/ as exceptions.
   epenthetic_eu:
     enabled: true
-    # elide ㅡ only when the syllable has a consonant initial and this is not
-    # the word's first syllable
-    requires_initial: true
-    requires_non_initial_position: true
+    word_initial_if_followed: true
 
-  # ㄹ is a liquid that assimilates across a syllable boundary in Korean.
-  # 신라 → Силла, not Синльа.
-  # OFF: ㄴ+ㄹ assimilation is native-Korean sandhi (신라 → 실라) but it
-  # corrupts loanword names — 하인리 must stay Хаинри, not Хаинлли.
+  # v2 NEW. Korean loanword spelling writes a C+l cluster as Cㅡㄹ + ㄹV
+  # (클라라 Clara, 블루 blue, 부틀린 Botulin): the ㅡ is epenthetic and ㄹㄹ is
+  # a single [l]. Same mechanism as epenthetic_eu, applied to the one case
+  # where the epenthetic syllable carries a coda.
+  #   부틀린 → Пүтлин (v1 gave Путыллин)   클라라 → Клара
+  cluster_eu_l:
+    enabled: true
+
+  # v2 NEW. Mongolian ы only ever follows a consonant. Vowel-initial ㅡ (은, 으)
+  # is written у: [ɯ] is a back high vowel and у [ʊ] is the nearest Mongolian
+  # one. This also keeps 은 (у) apart from 운 (ү), and stops 정은 reading as
+  # the genitive "Жонын". Matches the universal Mongolian form Ким Жон Ун.
+  eu_vowel_initial:
+    enabled: true
+    value: у
+
+  # v2 NEW. ㅢ is [ɰi] only without a consonant onset; after a consonant it is
+  # [i] (standard pronunciation rule 5: 희 [히]). Vowel-initial: уй, by the
+  # same reasoning as eu_vowel_initial.
+  ui_vowel:
+    enabled: true
+    after_consonant: и
+    vowel_initial: уй
+
+  # и + э at a syllable seam is written ие (Mongolian spells [ie] with е):
+  # 나비에 → Набие.
+  seam_i_e:
+    enabled: true
+
+  # OFF: ㄴ+ㄹ / ㄹ+ㄴ assimilation is native-Korean sandhi (신라 → 실라) but it
+  # corrupts the foreign-style names this engine mostly serves: 하인리 must
+  # stay Хаинри. The written form is what the viewer can match to the name.
   liquid_assimilation:
     enabled: false
-    pairs:
-      - [ㄴ, ㄹ]     # final ㄴ + initial ㄹ → лл
-      - [ㄹ, ㄹ]     # final ㄹ + initial ㄹ → лл
-    result: лл
 
-  # Korean ㄴ before ㄱ/ㄷ/ㅂ nasalises; keep it written as-is for subtitles
-  # (readability over phonetic fidelity). Documented so it is a choice.
+  # OFF: 박물관 [방물관]. Spelled forms stay recognisable; documented choice.
   nasalisation:
     enabled: false
 
 # ── Presentation ────────────────────────────────────────────────────────────
 presentation:
-  # Subtitles show names capitalised; the engine emits lowercase.
   capitalise_first_letter: true
-  # Word-final ㄹ is ь-softened (김철 → Ким Чхоль); elsewhere it is plain л.
-  word_final_l_soft: true
-  # Never emit more than one of these in a row after elision.
-  collapse_double_hyphen: true
+  # Korean personal names (--name): Mongolian usage writes every syllable as a
+  # separate capitalised word (Ким Жон Ун, Мүн Жэ Ин), but the sound rules are
+  # computed across the whole name, so 박근혜 → Пак Гын Хе, not Пак Кын Хе.
+  # Because each syllable is then a written word, codas take their word-final
+  # form: 윤석열 → Юн Сок Ёл (not Сог).
+  name_mode_space_syllables: true

@@ -4,6 +4,7 @@
   compile_termbase.py --work the-remarried-empress --domains court-historical
   compile_termbase.py --work the-remarried-empress --domains court-historical --tbx out.tbx
   compile_termbase.py --work the-remarried-empress --strict   # exit 1 if anything needs_review
+                                                               # or a rule_output drifted from the engine
 
 Precedence, highest first:  works/  >  domains/  >  rules/  >  global/
 
@@ -29,11 +30,11 @@ def yload(path):
 
 def collect(entry, out, layer, warnings):
     """Flatten a work/domain document into (ko -> record) pairs."""
-    def add(ko, mn, en="", status="needs_review", note="", group=""):
+    def add(ko, mn, en="", status="needs_review", note="", group="", usage="", rule_output=""):
         if not ko or not mn:
             return
-        rec = {"ko": ko, "mn": mn, "en": en, "status": status,
-               "note": note, "group": group, "layer": layer}
+        rec = {"ko": ko, "mn": mn, "en": en, "status": status, "note": note,
+               "group": group, "layer": layer, "usage": usage, "rule_output": rule_output}
         prev = out.get(ko)
         # first writer wins — layers are applied in precedence order
         if prev is None:
@@ -47,7 +48,8 @@ def collect(entry, out, layer, warnings):
                 if isinstance(it, dict) and it.get("ko"):
                     add(it["ko"], it.get("chosen") or it.get("mn"),
                         it.get("en", ""), it.get("status", "needs_review"),
-                        it.get("note", ""), key)
+                        it.get("note", ""), key, it.get("usage", ""),
+                        it.get("rule_output", ""))
     return out
 
 
@@ -65,21 +67,20 @@ def render_prompt(terms, rules_doc, work_title):
     groups = {}
     for rec in terms.values():
         groups.setdefault(rec["group"] or "terms", []).append(rec)
-    order = ["characters", "places", "titles_royal", "nobility",
-             "palace_household", "honorific_verbs", "overrides", "terms"]
+    order = ["characters", "places", "overrides", "titles_royal", "realms", "nobility",
+             "palace_household", "honorific_verbs", "terms"]
     for g in order + [k for k in groups if k not in order]:
         if g not in groups:
             continue
         lines.append(f"## {g}")
         for rec in sorted(groups[g], key=lambda r: r["ko"]):
             tail = f"  ({rec['en']})" if rec["en"] else ""
-            lines.append(f"- {rec['ko']} = {rec['mn']}{tail}")
+            use = f" — {rec['usage']}" if rec.get("usage") else ""
+            lines.append(f"- {rec['ko']} = {rec['mn']}{tail}{use}")
         lines.append("")
     if rules_doc:
         r = rules_doc.get("rules", {})
         lines.append("## register rules")
-        if (r.get("stop_voicing") or {}).get("enabled"):
-            lines.append("- Korean plain stops: к/т/п word-initially, г/д/б between vowels.")
         lines.append("- Address royalty with honorific verbs (морилох, залах, соёрхох).")
         lines.append("- Never use bare чи to a noble or royal; use та + honorific.")
     return "\n".join(lines).rstrip() + "\n"
@@ -103,6 +104,25 @@ def to_tbx(terms, lang_src="ko", lang_tgt="mn"):
         out.append('    </termEntry>')
     out += ['  </body></text>', '</tbx>']
     return "\n".join(out) + "\n"
+
+
+def check_rule_outputs(terms):
+    """Every `rule_output` must equal what the engine produces today.
+
+    A rule change that silently alters a character name fails --strict here,
+    so the termbase can never drift from rules/hangul-to-cyrillic.yaml.
+    """
+    sys.path.insert(0, HERE)
+    import translit
+    rules = translit.load_rules()
+    bad = []
+    for rec in terms.values():
+        ro = rec.get("rule_output")
+        if ro:
+            got = translit.transliterate(rec["ko"], rules)
+            if got != ro:
+                bad.append(f"{rec['ko']}: rule_output={ro} but engine gives {got}")
+    return bad
 
 
 def main():
@@ -156,7 +176,10 @@ def main():
             for w in warnings:
                 print(f"#   {w}", file=sys.stderr)
 
-    if a.strict and pending:
+    drift = check_rule_outputs(terms)
+    for d in drift:
+        print(f"# RULE DRIFT  {d}", file=sys.stderr)
+    if a.strict and (pending or drift):
         sys.exit(1)
 
 

@@ -2,133 +2,300 @@
 #
 # Precedence: works/ > domains/ > rules/ > global/
 #
-# Names here are mined from the actual Korean subtitle tracks of S01E01-E04,
-# so the `ko` field is the real on-screen spelling, not a guess. What is NOT
-# settled is the Mongolian rendering, because there is no national standard
-# for foreign-name transliteration (see rules/hangul-to-cyrillic.yaml).
+# The source is a Korean web novel (Alphatart); the names were COINED IN HANGUL.
+# The Korean spelling is therefore the original, and the official English
+# romanisation is a derivative that is measurably wrong in places
+# (라스타 is Rasta, not Rashta; 하인리 has no й). Every `ko` below is the
+# on-screen spelling from the S01E01-E04 Korean subtitle track.
 #
-# Every entry carries status:
-#   confirmed    — verified against on-screen usage or approved by the operator
-#   needs_review — rule output and the English romanisation disagree; a human
-#                  must choose. The compiler emits a warning for these.
-version: 1
+# NAME POLICY (applies to every character entry)
+#   1. Default: the rule engine output (`rule_output`). The viewer HEARS the
+#      Korean, so the subtitle should spell what is heard.
+#   2. Established-name exception, and only this: where the Korean spelling is
+#      the standard Korean rendering of a real, widely known Western name, use
+#      that name's conventional Mongolian form — but only to resolve a contrast
+#      Korean cannot write (l/r, b/v). It may never add or remove a sound the
+#      Korean has or lacks (no -r in Навиер, no ш in Рашта, no й in Хайнрей).
+#   3. The English romanisation is never evidence for a segment.
+#
+# STATUS
+#   confirmed — decided under delegated authority, reasoning in `note`.
+#   `confidence: medium` marks the entries a native Mongolian speaker should
+#   audit first. Entries without it are high-confidence.
+version: 2
 work:
   title_ko: 재혼 황후
   title_en: The Remarried Empress
   title_mn: Дахин гэрлэсэн хатан хаан
-  status: needs_review
+  status: confirmed
+  note: "재혼 = remarried, 황후 = empress; 황후 is Хатан хаан per domain pack."
 
 characters:
   - ko: 나비에
     role: female lead, Empress of the Eastern Empire
     rule_output: Набие
-    chosen: Навиер
-    alternatives: [Набие, Навиер]
-    status: needs_review
+    chosen: Набие
+    status: confirmed
     note: >
-      Korean 나비에 drops the final -r that the English romanisation "Navier"
-      carries. Rule output is Набие. Keeping -r matches the official credits;
-      following Korean strictly gives Набие. OPERATOR DECISION REQUIRED.
+      Rule output. Korean has no -r (Навиер followed the English) and no v;
+      the actors say [nabie], and Mongolian intervocalic б is itself lenited
+      toward [β], so Набие is what is heard. "Navier" is not an established
+      Western given name, so the exception clause does not apply.
 
   - ko: 소비에슈
     role: male lead, Emperor
-    rule_output: Собиешу
-    chosen: Совиешу
-    alternatives: [Собиешу, Совиешу]
-    status: needs_review
+    rule_output: Собиешү
+    chosen: Собиешү
+    status: confirmed
     note: >
-      Medial ㅂ voices to б by rule. The English "Sovieshu" suggests в.
-      Mongolian has no v/b contrast in this position that forces the issue.
+      Rule output. Same б reasoning as Набие (Совиешу followed the English).
+      슈 = palatal ㅅ + ㅠ; Korean ㅜ is [u] = Mongolian ү.
 
   - ko: 라스타
     role: runaway slave turned concubine
     rule_output: Раста
     chosen: Раста
-    alternatives: [Раста, Рашта]
-    status: needs_review
-    note: >
-      Korean is 라스타 (Raseuta) — NOT 라슈타. Rule gives Раста. Рашта would
-      follow the English spelling instead of the Korean pronunciation.
+    status: confirmed
+    note: "Korean is 라스타, never 라슈타; Рашта would spell the English, not the sound."
 
   - ko: 코샤르
     role: Navier's brother, a knight
     rule_output: Кошар
     chosen: Кошар
-    alternatives: [Кошар]
     status: confirmed
-    note: "Rule output matches every model's independent rendering. Safe."
+    note: "Rule output matches every model's independent rendering."
 
   - ko: 알바니
-    role: noblewoman
+    role: noblewoman (Grand Duchess Albani in E04)
     rule_output: Албани
     chosen: Албани
     status: confirmed
+    note: "Rule output."
 
   - ko: 로라
-    role: lady-in-waiting
+    role: lady-in-waiting (Laura Tallital)
     rule_output: Рора
     chosen: Лора
-    alternatives: [Рора, Лора]
-    status: needs_review
+    status: confirmed
     note: >
-      Word-initial ㄹ is a tap [ɾ] → р by rule. "Laura" is an established
-      Western name with a conventional Mongolian form Лора. Established-name
-      exception.
+      Established-name exception. 로라 is the standard Korean spelling of
+      Laura; Korean onset ㄹ cannot distinguish l from r, and Лора is the
+      conventional Mongolian/Russian form. Every Korean segment is kept
+      (로 not 라우 — so not Лаура).
 
   - ko: 하인리
-    role: Western kingdom prince
+    role: Western Kingdom prince
     rule_output: Хаинри
     chosen: Хаинри
-    alternatives: [Хаинри, Хайнрей]
-    status: needs_review
+    status: confirmed
     note: >
-      Korean 하인리 is three syllables with no final on 인. Хайнрей assumes
-      the English "Heinrey" spelling and inserts a й that Korean does not have.
+      Rule output. 하-인-리 is three syllables with no glide; Хайнрей invents a
+      й and an -ей from the English, and Mongolian ай is read [æː], which is
+      further from [ha.in] than аи.
 
   - ko: 부틀린
-    role: noble house
-    rule_output: Путыллин
-    chosen: Бутлин
-    alternatives: [Путыллин, Бутлин]
-    status: needs_review
+    role: noble house that adopts Rashta
+    rule_output: Пүтлин
+    chosen: Пүтлин
+    status: confirmed
     note: >
-      Rule keeps the ㅡ because 틀 carries a final ㄹ, producing the unreadable
-      Путыллин. Бутлин drops it and voices initial ㅂ. This is exactly the
-      "ugly rule output" case works/ exists for.
+      Rule output under v2 cluster_eu_l (틀+린 is a Korean-spelled tl cluster).
+      v1's Бутлин voiced the initial only because the English has B; word-
+      initial ㅂ is п by rule, as in Пүсан.
 
   - ko: 베르디
-    role: nobleman
-    rule_output: Перди
-    chosen: Берди
-    alternatives: [Перди, Берди]
-    status: needs_review
+    role: Viscountess Verdi
+    rule_output: Пэрди
+    chosen: Верди
+    status: confirmed
+    note: >
+      Established-name exception. 베르디 is the standard Korean spelling of
+      Verdi (주세페 베르디); Korean ㅂ cannot write v; Mongolian writes the
+      composer Верди. Only the b/v contrast and the loanword е differ.
 
   - ko: 서즈
     role: princess of the Southern Kingdom
     rule_output: Сож
     chosen: Сож
-    alternatives: [Сож, Сожу]
-    status: needs_review
-    note: "English renders this as 'Circe', which is a separate adaptation."
+    status: confirmed
+    note: >
+      Rule output. English "Circe" is an adaptation, not the Korean name;
+      Сожу would add a vowel Korean elides.
+
+  # ── names added from the E01-E04 track (rule output unless noted) ──
+  - ko: 크리스타
+    role: Queen of the Western Kingdom (E04)
+    rule_output: Криста
+    chosen: Криста
+    status: confirmed
+    note: "Rule output; also the conventional form of Krista."
+  - ko: 트로비
+    role: Navier's family (Duchess Trovi = her mother)
+    rule_output: Троби
+    chosen: Троби
+    status: confirmed
+    note: "Rule output; ㅂ → б as in Набие/Собиешү, for consistency within the family."
+  - ko: 이스쿠아
+    role: Rashta's adopted middle name (English "Ishka")
+    rule_output: Искүа
+    chosen: Искүа
+    status: confirmed
+    note: "Rule output. The English 'Ishka' has sh and drops the 쿠 vowel; Korean has neither change."
+  - ko: 맥켄나
+    role: Heinrey's aide (McKenna)
+    rule_output: Мэккэнна
+    chosen: Мэккэнна
+    status: confirmed
+    confidence: medium
+    note: "Rule output; keeps the Korean geminate. Not an established name in Mongolian."
+  - ko: 랑트
+    role: Marquess Lante
+    rule_output: Рант
+    chosen: Рант
+    status: confirmed
+    note: "Rule output; onset ㄹ → р (no established name to resolve l/r)."
+  - ko: 카프멘
+    role: Grand Duke Kaufman of Luipt
+    rule_output: Капмэн
+    chosen: Капмэн
+    status: confirmed
+    note: "Rule output. 카프멘 is not the standard Korean spelling of Kaufman (카우프만), so no exception."
+  - ko: 투아니아
+    role: Duchess Tuania
+    rule_output: Түаниа
+    chosen: Түаниа
+    status: confirmed
+    note: "Rule output."
+  - ko: 워턴
+    role: King Walton III of the Western Kingdom
+    rule_output: Вотон
+    chosen: Вотон
+    status: confirmed
+    note: "Rule output. 워턴 lacks the ㄹ of the standard 월턴 (Walton), so no exception."
+  - ko: 로테슈
+    role: Viscount Lotteshu
+    rule_output: Ротэшү
+    chosen: Ротэшү
+    status: confirmed
+    note: "Rule output."
+  - ko: 유지
+    role: Count Yuji
+    rule_output: Южи
+    chosen: Южи
+    status: confirmed
+    note: "Rule output."
+  - ko: 리스토르
+    role: Duke Ristore
+    rule_output: Ристор
+    chosen: Ристор
+    status: confirmed
+    note: "Rule output."
+  - ko: 탈리탈
+    role: Laura's house (Marquess Tallital)
+    rule_output: Таллитал
+    chosen: Таллитал
+    status: confirmed
+    note: "Rule output; ㄹ.ㄹ is a geminate лл."
+  - ko: 릴테앙
+    role: Grand Duke Liltean (pardoned uncle, E03)
+    rule_output: Рилтэан
+    chosen: Рилтэан
+    status: confirmed
+    note: "Rule output."
 
 places:
   - ko: 동대제국
     en: Eastern Empire
     mn: Дорнын эзэнт гүрэн
     status: confirmed
-    note: "Translated, not transliterated."
+    note: "Translated, not transliterated. 대제국 is a set compound; эзэнт гүрэн carries it."
+  - ko: 서왕국
+    en: Western Kingdom
+    mn: Өрнөд вант улс
+    status: confirmed
+    confidence: medium
+    note: "Translated (서 = west, 왕국 = вант улс). Өрнөд is the formal 'western' of the Дорнод/Өмнөд set."
+  - ko: 남왕국
+    en: Southern Kingdom
+    mn: Өмнөд вант улс
+    status: confirmed
+    note: "Translated; Өмнөд as in Өмнөд Солонгос."
+  - ko: 륍트 왕국
+    en: Kingdom of Luipt
+    mn: Рвипт вант улс
+    status: confirmed
+    note: "Name by rule (륍 = ㄹ+ㅟ+ㅂ) + вант улс."
+  - ko: 황궁
+    en: Imperial Palace
+    mn: эзэн хааны ордон
+    status: confirmed
+    note: "황 = imperial (эзэн хаан), 궁 = ордон."
+  - ko: 몬스항
+    en: Mons Harbor
+    mn: Монс боомт
+    status: confirmed
+    note: "Name by rule + 항 = боомт."
+  - ko: 장미방
+    en: Rose Room
+    mn: Сарнайн өрөө
+    status: confirmed
+    note: "Translated: 장미 = сарнай, 방 = өрөө. Korean names the room by meaning, so Mongolian does too."
   - ko: 상시천
     en: Springwater (bandits)
     mn: Саншичон
-    status: needs_review
-    note: "Rule output. Could also be translated as Булагтын дээрэмчид."
+    status: confirmed
+    usage: "Where the Korean means the group (상시천 토벌), write Саншичоны дээрэмчид."
+    note: >
+      Transliterated. The Korean uses 상시천 as an opaque proper name with no
+      word for 'bandits'; translating it (Булагтын…) would add meaning the
+      Korean viewer does not get.
+
+terms:
+  - ko: 신년제
+    en: New Year festival
+    mn: Шинэ жилийн баяр
+    status: confirmed
+    note: "Recurs through E01-E04; 신년 = шинэ жил, 제 = festival (баяр)."
+  - ko: 시녀장
+    en: head lady-in-waiting
+    mn: шивэгчдийн ахлагч
+    status: confirmed
+    note: "Head (장) of the 시녀 (шивэгчин); kept distinct from 상궁 = ахлах шивэгчин."
+  - ko: 정부
+    en: (royal) mistress — 情婦 sense only
+    mn: амраг
+    status: confirmed
+    confidence: medium
+    usage: "Only 情婦 (Rashta's status, 'the emperor's 정부'). 政府 'government' is засгийн газар."
+    note: >
+      Korean distinguishes 정부 (mistress) from 첩/후궁 (concubine = татвар эм),
+      so Mongolian must too. Not нууц амраг: her status is public.
 
 # Terms the show uses that a generic court pack would get wrong.
 overrides:
   - ko: 폐하
-    mn: Эрхэм дээдэс ээ
-    status: needs_review
+    mn: Эрхэм дээдэс
+    status: confirmed
+    usage: "Vocative and 3rd person alike. 황제 폐하 (3rd p.) → Эзэн хаан; 황후 폐하 (3rd p.) → Хатан хаан."
     note: >
-      Recurring 35x per episode — the single highest-impact decision in the
-      termbase. Alternatives seen across models: Хатан хаантан,
-      Эрхэм дээдэс, Дээдэс.
+      NIKL Korean-Mongolian dictionary (krdict): 폐하 = эрхэм дээдэс, used for
+      emperor AND empress — this show addresses both as 폐하, so a gender-
+      neutral form is required (Хатан хаантан would be wrong for Sovieshu).
+      Dropped the vocative particle ээ from v1: 173 occurrences in four
+      episodes, and the bare form reads faster while still working as address.
+  - ko: 전하
+    mn: Ханхүү минь
+    status: confirmed
+    confidence: medium
+    usage: "In E01-E04 전하 addresses Prince Heinrey only. 3rd person (전하께서) → ханхүү. If he reigns, switch to the domain form хаантан."
+    note: >
+      The domain form (хаантан, NIKL) means a king; here the addressee is a
+      prince, and the rank must stay below Эрхэм дээдэс. ханхүү + respectful
+      vocative минь (cf. Хаантан минь) keeps both.
+  - ko: 양
+    mn: бүсгүй
+    status: confirmed
+    usage: "Name + 양 → name + бүсгүй (라스타 양 → Раста бүсгүй)."
+    note: >
+      양 is neutral-polite to a young unmarried woman. Not авхай: that is a
+      noble's daughter (= 영애), and in its other sense it is ironic.

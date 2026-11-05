@@ -5,17 +5,20 @@ Rule-based, not a name list: any modern Hangul syllable transliterates from
 rules/hangul-to-cyrillic.yaml, so new shows need only exception entries.
 
   translit.py 나비에 소비에슈 라스타
+  translit.py --name 김정은               # Korean personal name: Ким Жон Ун
   translit.py --test                      # run tests/corpus.yaml
   translit.py --explain 소비에슈           # show per-syllable derivation
 
-stdlib only. PyYAML is used when available; a minimal fallback parser handles
-the flat maps in the rule file so the tool runs on a bare python3.
+Requires PyYAML (requirements.txt). v1 shipped a fallback parser whose
+hard-coded rules silently disagreed with the YAML (it enabled liquid
+assimilation), so it was removed: one source of truth.
 """
 import argparse
 import json
 import os
 import sys
-import unicodedata
+
+import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -35,37 +38,8 @@ JONG = ["", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ"
 
 
 def load_rules(path=RULES):
-    """Load the rule file. PyYAML if present, else a small purpose-built parser."""
-    try:
-        import yaml
-        with open(path, encoding="utf-8") as f:
-            return yaml.safe_load(f)
-    except ImportError:
-        pass
-    # fallback: parse only the four flat sections this engine needs
-    out = {"initials": {}, "vowels": {}, "finals": {}, "rules": {}}
-    section = None
-    for raw in open(path, encoding="utf-8"):
-        line = raw.rstrip("\n")
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if not line.startswith(" ") and line.endswith(":"):
-            section = line[:-1]
-            continue
-        if section in ("initials", "vowels", "finals") and line.startswith("  "):
-            k, _, v = line.strip().partition(":")
-            v = v.split("#")[0].strip()
-            if v in ('""', "''"):
-                v = ""
-            out[section][k.strip().strip('"')] = v.strip('"').strip("'")
-    out["rules"] = {"palatalisation": {"enabled": True,
-                                       "triggers": ["ㅑ", "ㅕ", "ㅛ", "ㅠ", "ㅣ"],
-                                       "map": {"ㅅ": "ш", "ㅆ": "щ"}},
-                    "epenthetic_eu": {"enabled": True},
-                    "liquid_assimilation": {"enabled": True,
-                                            "pairs": [["ㄴ", "ㄹ"], ["ㄹ", "ㄹ"]],
-                                            "result": "лл"}}
-    return out
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
 def decompose(ch):
@@ -75,140 +49,136 @@ def decompose(ch):
     return CHO[code // (N_JUNG * N_JONG)], JUNG[(code % (N_JUNG * N_JONG)) // N_JONG], JONG[code % N_JONG]
 
 
-def transliterate(text, rules):
-    """Transliterate a Korean string to Mongolian Cyrillic."""
+def _on(r, key):
+    return bool((r.get(key) or {}).get("enabled", False))
+
+
+def _pieces(text, rules, closed_codas=False):
+    """Return a list of (piece, is_hangul) — one piece per input character.
+
+    closed_codas: every syllable is written as its own word (name mode), so a
+    coda always takes its word-final form even before a vowel-initial syllable.
+    """
     ini, vow, fin = rules["initials"], rules["vowels"], rules["finals"]
+    fin_v = rules.get("finals_before_vowel") or fin
     r = rules.get("rules", {})
-    pal = r.get("palatalisation") or {}
-    pal_on = pal.get("enabled", False)
-    pal_trig = set(pal.get("triggers") or [])
-    pal_map = pal.get("map") or {}
-    pal_vow = pal.get("vowel_map") or {}
-    ep = (r.get("epenthetic_eu") or {}).get("enabled", False)
-    la = r.get("liquid_assimilation") or {}
-    la_on = la.get("enabled", False)
-    la_pairs = {tuple(p) for p in (la.get("pairs") or [])}
-    la_res = la.get("result", "лл")
-
-    sylls = []
-    for ch in text:
-        d = decompose(ch)
-        if d is None:
-            sylls.append((None, ch))
-        else:
-            sylls.append((d, ch))
-
     sv = r.get("stop_voicing") or {}
-    sv_on = sv.get("enabled", False)
-    sv_init = sv.get("word_initial") or {}
-    sv_med = sv.get("intervocalic") or {}
+    sv_init, sv_else = sv.get("word_initial") or {}, sv.get("elsewhere") or {}
+    tense = (r.get("tense_initial") or {}).get("map") or {}
+    pal = r.get("palatalisation") or {}
+    pal_trig, pal_map, pal_vow = set(pal.get("triggers") or []), pal.get("map") or {}, pal.get("vowel_map") or {}
+    aff = r.get("affricate_glide_absorption") or {}
+    aff_c, aff_vow = set(aff.get("consonants") or []), aff.get("vowel_map") or {}
+    ep = r.get("epenthetic_eu") or {}
+    euv = r.get("eu_vowel_initial") or {}
+    uiv = r.get("ui_vowel") or {}
 
-    out = []
-    SONORANT = {"", "ㄴ", "ㅁ", "ㄹ", "ㅇ"}
-    for idx, (d, ch) in enumerate(sylls):
+    sylls = [decompose(ch) for ch in text]
+    n = len(sylls)
+    out = []            # (piece, is_hangul)
+    force_l = set()     # syllable indices whose onset ㄹ is the l of a Cl cluster
+
+    def prev_out():
+        return out[-1][0] if out and out[-1][1] else ""
+
+    for idx, ch in enumerate(text):
+        d = sylls[idx]
         if d is None:
-            out.append(ch)
+            out.append((ch, False))
             continue
         c, v, j = d
-        # liquid assimilation across the boundary (final of prev + initial of this)
-        if la_on and idx > 0 and out:
-            prev = sylls[idx - 1][0]
-            if prev and (prev[2], c) in la_pairs:
-                if out[-1].endswith("ль"):
-                    out[-1] = out[-1][:-2]
-                out.append(la_res + vow.get(v, ""))
-                # a final on this syllable still applies below
-                if j:
-                    out[-1] = out[-1] + fin.get(j, "")
-                continue
-        # epenthetic ㅡ: only a vowel carrier for a bare consonant. If the
-        # syllable has its own final (근, 은, 틀) the ㅡ is a real vowel.
-        if ep and v == "ㅡ" and c != "ㅇ" and idx > 0 and j == "":
-            out.append(ini.get(c, ""))
-            continue
+        prev = sylls[idx - 1] if idx > 0 else None
+        nxt = sylls[idx + 1] if idx + 1 < n else None
+        word_initial = prev is None
+        word_final = nxt is None
+
+        # ── onset ──
         cons = ini.get(c, "")
-        # stop voicing: Korean voices a plain stop only between voiced sounds,
-        # so medial ㄱ/ㄷ/ㅂ become г/д/б after a vowel or sonorant, and stay
-        # к/т/п after an obstruent (박근혜 → Пак Кын Хе, not Паггынхе).
-        if sv_on and c in sv_init:
-            prev_final = sylls[idx - 1][0][2] if idx > 0 and sylls[idx - 1][0] else ""
-            if idx == 0 or prev_final not in SONORANT:
-                cons = sv_init[c]
-            else:
-                cons = sv_med.get(c, cons)
-        # initial ㄹ after a syllable already ending in л stays л (부틀린 → Бутлин)
-        if c == "ㄹ" and idx > 0 and out and out[-1].endswith("л"):
+        if _on(r, "tense_initial") and word_initial and c in tense:
+            cons = tense[c]
+        if _on(r, "stop_voicing") and c in sv_init:
+            cons = sv_init[c] if word_initial else sv_else.get(c, cons)
+        if c == "ㄹ" and (idx in force_l or prev_out().endswith("л")):
             cons = "л"
+
+        # ── epenthetic ㅡ ──
+        if _on(r, "cluster_eu_l") and v == "ㅡ" and c != "ㅇ" and j == "ㄹ" \
+                and nxt is not None and nxt[0] == "ㄹ":
+            out.append((cons, True))
+            force_l.add(idx + 1)
+            continue
+        if _on(r, "epenthetic_eu") and v == "ㅡ" and c != "ㅇ" and j == "":
+            if not word_initial or (ep.get("word_initial_if_followed") and not word_final):
+                out.append((cons, True))
+                continue
+
+        # ── nucleus ──
         vv = vow.get(v, "")
-        if pal_on and c in pal_map and v in pal_trig:
+        if v == "ㅡ" and c == "ㅇ" and _on(r, "eu_vowel_initial"):
+            vv = euv.get("value", "у")
+        if v == "ㅢ" and _on(r, "ui_vowel"):
+            vv = uiv.get("vowel_initial", "уй") if c == "ㅇ" else uiv.get("after_consonant", "и")
+        if _on(r, "palatalisation") and c in pal_map and v in pal_trig:
             cons = pal_map[c]
             vv = pal_vow.get(v, vv)
-        jj = fin.get(j, "")
-        pres = rules.get("presentation") or {}
-        # word-final ㄹ softens: 김철 → Ким Чхоль
-        if j == "ㄹ" and pres.get("word_final_l_soft", True) and idx == len(sylls) - 1:
-            jj = "ль"
-        # word-final ㄱ is written к, not г: 박 → Пак
-        if j == "ㄱ" and idx == len(sylls) - 1:
-            jj = "к"
-        # A final obstruent is released as voiceless before a consonant and
-        # voiced (liaison) only before a vowel-initial syllable:
-        #   박근혜 → Паккынхе (ㄱ before ㄱ)   한국어 → Хангуго (ㄱ before ㅇ)
-        if j in ("ㄱ", "ㄷ", "ㅂ") and idx < len(sylls) - 1:
-            nxt = sylls[idx + 1][0]
-            if nxt and nxt[0] != "ㅇ":
-                jj = {"ㄱ": "к", "ㄷ": "т", "ㅂ": "п"}[j]
-        piece = cons + vv + jj
-        # и + э at a syllable seam reads as ие, not иэ
-        if out and piece.startswith("э") and out[-1].endswith("и"):
-            piece = "е" + piece[1:]
-        out.append(piece)
+        if _on(r, "affricate_glide_absorption") and c in aff_c and v in aff_vow:
+            vv = aff_vow[v]
 
-    s = "".join(out)
-    if (rules.get("presentation") or {}).get("capitalise_first_letter", True) and s:
-        s = s[0].upper() + s[1:]
-    return s
+        # ── coda ──
+        if j and not closed_codas and not word_final and nxt[0] == "ㅇ":
+            jj = fin_v.get(j, fin.get(j, ""))
+        else:
+            jj = fin.get(j, "")
+
+        piece = cons + vv + jj
+        if _on(r, "seam_i_e") and piece.startswith("э") and prev_out().endswith("и"):
+            piece = "е" + piece[1:]
+        out.append((piece, True))
+    return out
+
+
+def transliterate(text, rules, name=False):
+    """Transliterate a Korean string to Mongolian Cyrillic.
+
+    name=True: Korean personal name. Sound rules run across the whole name;
+    output is one capitalised word per syllable (Mongolian usage).
+    """
+    pres = rules.get("presentation") or {}
+    if name:
+        parts = []
+        for word in text.split():
+            ps = [p for p, h in _pieces(word, rules, closed_codas=True)]
+            parts += [p[:1].upper() + p[1:] for p in ps if p]
+        return " ".join(parts)
+    words = []
+    for word in text.split(" "):
+        s = "".join(p for p, _ in _pieces(word, rules))
+        if pres.get("capitalise_first_letter", True) and s:
+            s = s[0].upper() + s[1:]
+        words.append(s)
+    return " ".join(words)
 
 
 def explain(text, rules):
     rows = []
-    for ch in text:
+    for (piece, h), ch in zip(_pieces(text, rules), text):
         d = decompose(ch)
-        if d is None:
-            rows.append((ch, "—", "—", "literal"))
-            continue
-        c, v, j = d
-        rows.append((ch, f"{c}+{v}+{j or '∅'}",
-                     rules["initials"].get(c, "") + rules["vowels"].get(v, "") + rules["finals"].get(j, ""),
-                     ""))
+        rows.append((ch, "—" if d is None else f"{d[0]}+{d[1]}+{d[2] or '∅'}", piece))
     return rows
 
 
 def run_tests(rules, corpus_path=None):
     corpus_path = corpus_path or os.path.join(ROOT, "tests", "corpus.yaml")
-    raw = open(corpus_path, encoding="utf-8").read()
-    cases, fails = [], 0
-    try:
-        import yaml
-        cases = yaml.safe_load(raw).get("cases", [])
-    except ImportError:
-        for line in raw.splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or ":" in line and not line.startswith("-"):
-                continue
-            if line.startswith("- "):
-                line = line[2:]
-            k, _, v = line.partition(":")
-            if k.strip() and v.strip():
-                cases.append({"ko": k.strip().strip('"'), "mn": v.strip().strip('"')})
+    with open(corpus_path, encoding="utf-8") as f:
+        cases = yaml.safe_load(f).get("cases", [])
+    fails = 0
     for c in cases:
-        got = transliterate(c["ko"], rules)
+        got = transliterate(c["ko"], rules, name=c.get("mode") == "name")
         ok = got == c["mn"]
-        if not ok:
-            fails += 1
-        print(f"{'PASS' if ok else 'FAIL'}  {c['ko']:<12} expect={c['mn']:<14} got={got}"
-              + ("" if ok else f"   [{c.get('note','')}]"))
-    print(f"\n{len(cases)-fails}/{len(cases)} passed")
+        fails += not ok
+        print(f"{'PASS' if ok else 'FAIL'}  {c['ko']:<12} expect={c['mn']:<16} got={got}"
+              + ("" if ok else f"   [{c.get('note', '')}]"))
+    print(f"\n{len(cases) - fails}/{len(cases)} passed")
     return 0 if fails == 0 else 1
 
 
@@ -216,6 +186,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("text", nargs="*")
     ap.add_argument("--test", action="store_true")
+    ap.add_argument("--name", action="store_true", help="treat input as Korean personal names")
     ap.add_argument("--explain", metavar="KO")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
@@ -224,13 +195,13 @@ def main():
     if a.test:
         sys.exit(run_tests(rules))
     if a.explain:
-        for ch, jamo, naive, note in explain(a.explain, rules):
-            print(f"  {ch}  {jamo:<12} naive={naive:<6} {note}")
-        print(f"  => {transliterate(a.explain, rules)}")
+        for ch, jamo, piece in explain(a.explain, rules):
+            print(f"  {ch}  {jamo:<12} -> {piece}")
+        print(f"  => {transliterate(a.explain, rules, name=a.name)}")
         return
     if not a.text:
         ap.error("give Korean text, --test, or --explain")
-    res = [{"ko": t, "mn": transliterate(t, rules)} for t in a.text]
+    res = [{"ko": t, "mn": transliterate(t, rules, name=a.name)} for t in a.text]
     print(json.dumps(res, ensure_ascii=False) if a.json
           else "\n".join(f"{r['ko']}\t{r['mn']}" for r in res))
 
