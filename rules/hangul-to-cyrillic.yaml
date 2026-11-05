@@ -1,0 +1,160 @@
+# Hangul → Mongolian Cyrillic transliteration rules
+#
+# WHY THIS FILE EXISTS
+# There is no national standard for rendering foreign names into Mongolian Cyrillic.
+# The National Council on Language Policy (ХБҮЗ) stated in October 2025 that
+# "гадаад үг, нэр томьёо, оноосон нэрийг монгол хэлнээ буулгах тогтсон дүрэм,
+#  стандарт байхгүй" — no established rule or standard exists.
+# MNS 5217:2012 is Cyrillic → Latin romanisation, the wrong direction.
+#
+# So this file IS the convention. It is deterministic, testable, and versioned.
+# It is not "correct" by authority — it is correct by being consistent.
+#
+# Everything here was derived from and checked against real Korean dialogue
+# (The Remarried Empress S01E01-E04 subtitle tracks). See tests/corpus.yaml.
+
+version: 1
+description: >
+  Syllable-level Hangul to Mongolian Cyrillic mapping. Composable: any of the
+  11,172 modern Hangul syllables transliterates from these tables, so new shows
+  need no new name entries — only exceptions.
+
+# ── Initial consonants (초성, 19) ────────────────────────────────────────────
+# Applied at the start of a syllable. Values are before a vowel.
+initials:
+  ㄱ: г
+  ㄲ: кк
+  ㄴ: н
+  ㄷ: д
+  ㄸ: тт
+  ㄹ: р
+  ㅁ: м
+  ㅂ: б
+  ㅃ: пп
+  ㅅ: с        # → ш before a y-vowel or ㅣ; see rules.palatalisation
+  ㅆ: сс
+  ㅇ: ""       # silent placeholder, carries no consonant
+  ㅈ: ж
+  ㅉ: жж
+  ㅊ: ч
+  ㅋ: к
+  ㅌ: т
+  ㅍ: п
+  ㅎ: х
+
+# ── Vowels (중성, 21) ───────────────────────────────────────────────────────
+vowels:
+  ㅏ: а
+  ㅐ: э
+  ㅑ: я
+  ㅒ: е
+  ㅓ: о        # 서울 → Соул, 정 → Жон, 성 → Сон
+  ㅔ: е        # 베르디 → Берди
+  ㅕ: ё
+  ㅖ: е
+  ㅗ: о
+  ㅘ: ва
+  ㅙ: вэ
+  ㅚ: вэ
+  ㅛ: ё
+  ㅜ: у
+  ㅝ: во
+  ㅞ: ве
+  ㅟ: ви
+  ㅠ: ю
+  ㅡ: ы        # usually elided — see rules.epenthetic_eu
+  ㅢ: ый
+  ㅣ: и
+
+# ── Final consonants (종성, 28) ─────────────────────────────────────────────
+finals:
+  "": ""
+  ㄱ: г
+  ㄲ: к
+  ㄳ: кс
+  ㄴ: н
+  ㄵ: нж
+  ㄶ: н
+  ㄷ: д
+  ㄹ: л        # 알바니 → Албани; word-final becomes ль (presentation rule)
+  ㄺ: льг
+  ㄻ: льм
+  ㄼ: льб
+  ㄽ: льс
+  ㄾ: льт
+  ㄿ: льп
+  ㅀ: ль
+  ㅁ: м
+  ㅂ: б
+  ㅄ: пс
+  ㅅ: с
+  ㅆ: с
+  ㅇ: н        # Korean final ㅇ is written н in names: 강 → Кан, 정 → Жон
+  ㅈ: д
+  ㅊ: д
+  ㅋ: к
+  ㅌ: т
+  ㅍ: п
+  ㅎ: ""
+
+# ── Contextual rules ────────────────────────────────────────────────────────
+rules:
+  # Korean plain ㄱ/ㄷ/ㅂ are voiceless word-initially and voiced between
+  # vowels. Mongolian distinguishes the two, so position decides the letter.
+  #   김정은 → Ким Жон Ын   (initial ㄱ = к)
+  #   소비에슈 → Собиешу     (medial ㅂ = б)
+  stop_voicing:
+    enabled: true
+    word_initial:   {ㄱ: к, ㄷ: т, ㅂ: п}
+    intervocalic:   {ㄱ: г, ㄷ: д, ㅂ: б}
+    # ㅈ/ㅊ are written ж/ч in both positions — Mongolian usage (Жон, Жэ)
+    # does not voice them, so they are not in these maps.
+
+  # ㅅ/ㅆ are palatalised before y-vowels and ㅣ in Korean, and Mongolian has
+  # a dedicated letter for that sound. 샤 → ша, not ся.
+  palatalisation:
+    enabled: true
+    triggers: [ㅑ, ㅕ, ㅛ, ㅠ, ㅣ]
+    map:
+      ㅅ: ш
+      ㅆ: щ
+    # the y-glide is absorbed by the hushing consonant: 샤 → ша, not шя
+    vowel_map: {ㅑ: а, ㅕ: о, ㅛ: о, ㅠ: у, ㅣ: и}
+
+  # Korean inserts ㅡ as an epenthetic vowel inside consonant clusters where
+  # Korean phonotactics forbid the cluster. Mongolian permits it, so the vowel
+  # is dropped. Evidence from real dialogue:
+  #   라스타 → Раста   (not Расыта)
+  #   코샤르 → Кошар   (not Кошар ы р)
+  #   부틀린 → Бутлин  (not Бутыллин)
+  epenthetic_eu:
+    enabled: true
+    # elide ㅡ only when the syllable has a consonant initial and this is not
+    # the word's first syllable
+    requires_initial: true
+    requires_non_initial_position: true
+
+  # ㄹ is a liquid that assimilates across a syllable boundary in Korean.
+  # 신라 → Силла, not Синльа.
+  # OFF: ㄴ+ㄹ assimilation is native-Korean sandhi (신라 → 실라) but it
+  # corrupts loanword names — 하인리 must stay Хаинри, not Хаинлли.
+  liquid_assimilation:
+    enabled: false
+    pairs:
+      - [ㄴ, ㄹ]     # final ㄴ + initial ㄹ → лл
+      - [ㄹ, ㄹ]     # final ㄹ + initial ㄹ → лл
+    result: лл
+
+  # Korean ㄴ before ㄱ/ㄷ/ㅂ nasalises; keep it written as-is for subtitles
+  # (readability over phonetic fidelity). Documented so it is a choice.
+  nasalisation:
+    enabled: false
+
+# ── Presentation ────────────────────────────────────────────────────────────
+presentation:
+  # Subtitles show names capitalised; the engine emits lowercase.
+  capitalise_first_letter: true
+  # Word-final ㄹ is ь-softened (김철 → Ким Чхоль); elsewhere it is plain л.
+  word_final_l_soft: true
+  # Never emit more than one of these in a row after elision.
+  collapse_double_hyphen: true

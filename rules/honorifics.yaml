@@ -1,0 +1,21 @@
+# Register policy for Korean -> Mongolian subtitle translation.
+#
+# Korean encodes social rank in the verb ending and the pronoun. Mongolian has
+# a comparable system (та/чи, honorific verbs), but English flattens it — which
+# is exactly why the Korean track must stay the source of truth.
+version: 1
+speech_levels:
+  formal_polite:      # 합쇼체 / 해요체 to a superior
+    mn: "та + honorific verb (морилох, залах, соёрхох, хүртээх)"
+  polite:             # 해요체 to an equal of higher standing
+    mn: "та + plain polite verb"
+  intimate:           # 반말 between close equals or family
+    mn: "чи + plain verb"
+  humble:             # to royalty, from a servant
+    mn: "би + honorific verb, never чи"
+
+rules:
+  - Never use bare чи to a noble or royal, in any context.
+  - A servant addressing royalty uses the honorific verb even in anger.
+  - 반말 between siblings stays informal; 반말 from a noble to a servant is contempt, not intimacy.
+  - Keep one rendering of a title per work. If 폐하 is Хатан хаантан, it stays Хатан хаантан.

@@ -1,0 +1,162 @@
+# Domain pack: Korean court / historical drama (사극)
+#
+# Korean court titles are a CLOSED SET — roughly fifty terms that cover every
+# sageuk ever made. Getting them right once means every historical drama
+# inherits them, which is why this is the highest-value file in the repo.
+#
+# STATUS DISCIPLINE
+#   confirmed    — validated in a multi-model bake-off against real dialogue,
+#                  or approved by a native speaker
+#   needs_review — drafted from standard usage; NOT yet approved
+#
+# Nothing here is backed by a Mongolian national standard. The state's own
+# position (ХБҮЗ, Oct 2025) is that no such standard exists for rendering
+# foreign terms. These are conventions, chosen for consistency.
+version: 1
+domain: court-historical
+applies_to: [sageuk, court, historical, palace]
+
+titles_royal:
+  - ko: 폐하
+    en: Your Majesty (sovereign)
+    mn: Эрхэм дээдэс ээ
+    status: needs_review
+    note: "Vocative. Third person: Хатан хаантан / Эзэн хаантан."
+  - ko: 전하
+    en: Your Highness
+    mn: Эрхэм дээд
+    status: needs_review
+  - ko: 마마
+    en: Her/His Highness (royal consort, queens dowager)
+    mn: Эрхэм дээд
+    status: needs_review
+  - ko: 황후
+    en: Empress
+    mn: Хатан хаан
+    status: confirmed
+  - ko: 황제
+    en: Emperor
+    mn: Эзэн хаан
+    status: confirmed
+  - ko: 황태자
+    en: Crown Prince
+    mn: Эзэн хааны хунтайж
+    status: needs_review
+  - ko: 세자
+    en: Crown Prince (Joseon)
+    mn: хунтайж
+    status: needs_review
+  - ko: 왕비
+    en: Queen consort
+    mn: хатан
+    status: needs_review
+  - ko: 대비
+    en: Queen Dowager
+    mn: бэлэвсэн хатан
+    status: needs_review
+  - ko: 중전
+    en: The Queen (as addressed by court)
+    mn: хатан
+    status: needs_review
+  - ko: 공주
+    en: Princess (royal daughter)
+    mn: гүнж
+    status: needs_review
+  - ko: 왕자
+    en: Prince (royal son)
+    mn: хан хүү
+    status: needs_review
+  - ko: 대군
+    en: Grand Prince
+    mn: их хан хүү
+    status: needs_review
+  - ko: 대공
+    en: Grand Duke
+    mn: их гүн
+    status: needs_review
+
+nobility:
+  - ko: 공작
+    en: Duke
+    mn: гүн
+    status: needs_review
+  - ko: 후작
+    en: Marquess
+    mn: маркиз
+    status: needs_review
+  - ko: 백작
+    en: Count / Earl
+    mn: гүн
+    status: needs_review
+  - ko: 경
+    en: Lord (as in Kosair 경)
+    mn: ноён
+    status: confirmed
+    note: "Validated across every model in the bake-off."
+  - ko: 영애
+    en: Lady (young noblewoman)
+    mn: хатагтай
+    status: needs_review
+  - ko: 부인
+    en: Lady / Madam (married noblewoman)
+    mn: хатагтай
+    status: needs_review
+  - ko: 나으리
+    en: my lord (archaic address)
+    mn: ноён минь
+    status: needs_review
+
+palace_household:
+  - ko: 상궁
+    en: senior court lady
+    mn: ордны бүсгүй
+    status: needs_review
+  - ko: 나인
+    en: palace maid
+    mn: ордны шивэгчин
+    status: needs_review
+  - ko: 시녀
+    en: handmaiden
+    mn: шивэгчин
+    status: needs_review
+  - ko: 내관
+    en: eunuch official
+    mn: ордны түшмэл
+    status: needs_review
+  - ko: 노비
+    en: slave / bondservant
+    mn: зарц
+    status: needs_review
+  - ko: 후궁
+    en: royal concubine
+    mn: татвар эм
+    status: confirmed
+    note: "Used in E01 dialogue (첩); татвар эм is the standard term."
+  - ko: 첩
+    en: concubine
+    mn: татвар эм
+    status: confirmed
+
+honorific_verbs:
+  # The distinction that models most often lose. See rules/honorifics.yaml.
+  - ko: 계시다
+    en: to be (honorific)
+    mn: залах
+    status: needs_review
+  - ko: 오시다
+    en: to come (honorific)
+    mn: морилох
+    status: needs_review
+    note: "морилж байна — validated in bake-off as the correct court register."
+  - ko: 드시다
+    en: to eat/drink (honorific)
+    mn: зооглох
+    status: needs_review
+  - ko: 주무시다
+    en: to sleep (honorific)
+    mn: унтах (соёрхон унтах)
+    status: needs_review
+  - ko: 돌아가시다
+    en: to pass away (honorific)
+    mn: таалал төгсөх
+    status: needs_review

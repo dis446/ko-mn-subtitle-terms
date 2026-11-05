@@ -1,0 +1,134 @@
+# Per-work overrides — The Remarried Empress (재혼 황후)
+#
+# Precedence: works/ > domains/ > rules/ > global/
+#
+# Names here are mined from the actual Korean subtitle tracks of S01E01-E04,
+# so the `ko` field is the real on-screen spelling, not a guess. What is NOT
+# settled is the Mongolian rendering, because there is no national standard
+# for foreign-name transliteration (see rules/hangul-to-cyrillic.yaml).
+#
+# Every entry carries status:
+#   confirmed    — verified against on-screen usage or approved by the operator
+#   needs_review — rule output and the English romanisation disagree; a human
+#                  must choose. The compiler emits a warning for these.
+version: 1
+work:
+  title_ko: 재혼 황후
+  title_en: The Remarried Empress
+  title_mn: Дахин гэрлэсэн хатан хаан
+  status: needs_review
+
+characters:
+  - ko: 나비에
+    role: female lead, Empress of the Eastern Empire
+    rule_output: Набие
+    chosen: Навиер
+    alternatives: [Набие, Навиер]
+    status: needs_review
+    note: >
+      Korean 나비에 drops the final -r that the English romanisation "Navier"
+      carries. Rule output is Набие. Keeping -r matches the official credits;
+      following Korean strictly gives Набие. OPERATOR DECISION REQUIRED.
+
+  - ko: 소비에슈
+    role: male lead, Emperor
+    rule_output: Собиешу
+    chosen: Совиешу
+    alternatives: [Собиешу, Совиешу]
+    status: needs_review
+    note: >
+      Medial ㅂ voices to б by rule. The English "Sovieshu" suggests в.
+      Mongolian has no v/b contrast in this position that forces the issue.
+
+  - ko: 라스타
+    role: runaway slave turned concubine
+    rule_output: Раста
+    chosen: Раста
+    alternatives: [Раста, Рашта]
+    status: needs_review
+    note: >
+      Korean is 라스타 (Raseuta) — NOT 라슈타. Rule gives Раста. Рашта would
+      follow the English spelling instead of the Korean pronunciation.
+
+  - ko: 코샤르
+    role: Navier's brother, a knight
+    rule_output: Кошар
+    chosen: Кошар
+    alternatives: [Кошар]
+    status: confirmed
+    note: "Rule output matches every model's independent rendering. Safe."
+
+  - ko: 알바니
+    role: noblewoman
+    rule_output: Албани
+    chosen: Албани
+    status: confirmed
+
+  - ko: 로라
+    role: lady-in-waiting
+    rule_output: Рора
+    chosen: Лора
+    alternatives: [Рора, Лора]
+    status: needs_review
+    note: >
+      Word-initial ㄹ is a tap [ɾ] → р by rule. "Laura" is an established
+      Western name with a conventional Mongolian form Лора. Established-name
+      exception.
+
+  - ko: 하인리
+    role: Western kingdom prince
+    rule_output: Хаинри
+    chosen: Хаинри
+    alternatives: [Хаинри, Хайнрей]
+    status: needs_review
+    note: >
+      Korean 하인리 is three syllables with no final on 인. Хайнрей assumes
+      the English "Heinrey" spelling and inserts a й that Korean does not have.
+
+  - ko: 부틀린
+    role: noble house
+    rule_output: Путыллин
+    chosen: Бутлин
+    alternatives: [Путыллин, Бутлин]
+    status: needs_review
+    note: >
+      Rule keeps the ㅡ because 틀 carries a final ㄹ, producing the unreadable
+      Путыллин. Бутлин drops it and voices initial ㅂ. This is exactly the
+      "ugly rule output" case works/ exists for.
+
+  - ko: 베르디
+    role: nobleman
+    rule_output: Перди
+    chosen: Берди
+    alternatives: [Перди, Берди]
+    status: needs_review
+
+  - ko: 서즈
+    role: princess of the Southern Kingdom
+    rule_output: Сож
+    chosen: Сож
+    alternatives: [Сож, Сожу]
+    status: needs_review
+    note: "English renders this as 'Circe', which is a separate adaptation."
+
+places:
+  - ko: 동대제국
+    en: Eastern Empire
+    mn: Дорнын эзэнт гүрэн
+    status: confirmed
+    note: "Translated, not transliterated."
+  - ko: 상시천
+    en: Springwater (bandits)
+    mn: Саншичон
+    status: needs_review
+    note: "Rule output. Could also be translated as Булагтын дээрэмчид."
+
+# Terms the show uses that a generic court pack would get wrong.
+overrides:
+  - ko: 폐하
+    mn: Эрхэм дээдэс ээ
+    status: needs_review
+    note: >
+      Recurring 35x per episode — the single highest-impact decision in the
+      termbase. Alternatives seen across models: Хатан хаантан,
+      Эрхэм дээдэс, Дээдэс.

@@ -1,0 +1,69 @@
+# Transliteration regression corpus
+#
+# Every case is a real Korean string taken from The Remarried Empress
+# S01E01-E04 subtitle tracks, or a well-known Korean name used to pin a rule.
+# These assert the RULE ENGINE's output — not the finished subtitle spelling.
+# Where the rule output is awkward, the exception belongs in works/, not here.
+#
+# Run: python3 scripts/translit.py --test
+version: 1
+cases:
+  # ── character names, mined from the actual dialogue ──
+  - ko: 라스타
+    mn: Раста
+    note: "Rashta — Korean is 라스타, not 라슈타. ㅡ elided in 스"
+  - ko: 코샤르
+    mn: Кошар
+    note: "Kosair — 샤 → ша (palatalisation absorbs the glide)"
+  - ko: 알바니
+    mn: Албани
+    note: "Albani — medial ㄹ is л, not ль"
+  - ko: 나비에
+    mn: Набие
+    note: "Navier — rule gives Набие; the -r is an English artefact, see works/"
+  - ko: 소비에슈
+    mn: Собиешу
+    note: "Sovieshu — medial ㅂ → б, 슈 → шу"
+  - ko: 하인리
+    mn: Хаинри
+    note: "Heinrey — liquid assimilation OFF, so н+р survives"
+  - ko: 서즈
+    mn: Сож
+    note: "Circe/Seoju — 즈 elides to ж"
+  - ko: 부틀린
+    mn: Путыллин
+    note: "Botulin — 틀 keeps its ㅡ (has a final); ugly by rule, override in works/"
+  - ko: 상시천
+    mn: Саншичон
+    note: "Springwater — final ㅇ → н, 시 → ши"
+  - ko: 베르디
+    mn: Перди
+    note: "Verdi — word-initial ㅂ → п; the real name wants Берди, see works/"
+
+  # ── well-known Korean names pinning the general rules ──
+  - ko: 김정은
+    mn: Кимжонын
+    note: "initial ㄱ → к; 정 → жон; spacing is the caller's job → Ким Жон Ын"
+  - ko: 문재인
+    mn: Мунжэин
+    note: "medial ㅈ → ж"
+  - ko: 박근혜
+    mn: Паккынхе
+    note: "final ㄱ before a consonant stays к, and 근 keeps its ㅡ"
+  - ko: 김철
+    mn: Кимчоль
+    note: "word-final ㄹ softens to ль"
+
+  # ── place names pinning liaison and nasals ──
+  - ko: 서울
+    mn: Соуль
+    note: "ㅓ → о (not ө)"
+  - ko: 강남
+    mn: Каннам
+    note: "final ㅇ → н, not нг"
+  - ko: 부산
+    mn: Пусан
+    note: "word-initial ㅂ → п"
+  - ko: 백제
+    mn: Пэкже
+    note: "final ㄱ before ㅈ → к"
